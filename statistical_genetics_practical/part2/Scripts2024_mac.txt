@@ -1,0 +1,232 @@
+# Assuming that we are working under the Practical folder
+# The following R dependencies may be needed
+# install.packages("optparse")
+# install.packages("farver")
+
+#########################################################
+#                                                       #
+#                  1.5 Perform clumping                 #
+#                                                       #
+#########################################################
+
+./Software/plink_mac \
+    --bfile Target_Data/TAR \
+    --clump Base_Data/GIANT_Height.txt \
+    --clump-p1 1 \
+    --clump-snp-field MarkerName \
+    --clump-field p \
+    --clump-kb 250 \
+    --clump-r2 0.1 \
+    --out Results/Height
+
+#########################################################
+#                                                       #
+#      1.6.1 PRS based on GWAS significant SNPs         #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice ./Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.height \
+    --binary-target F \
+    --bar-levels 5e-8 \
+    --no-full \
+    --fastscore \
+    --out Results/Height.gws
+
+#########################################################
+#                                                       #
+#      1.6.2 PRS with multiple P-value thresholds       #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.height \
+    --binary-target F \
+    --fastscore \
+    --out Results/Height.fast
+
+#########################################################
+#                                                       #
+#          1.6.3     High-Resolution Scoring            #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.height \
+    --binary-target F \
+    --perm 1000 \
+    --out Results/Height.highres
+
+#########################################################
+#                                                       #
+#          1.7    Accounting for Covariate              #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.height \
+    --binary-target F \
+    --cov Target_Data/TAR.covariate \
+    --cov-col Sex \
+    --out Results/Height.sex
+
+#########################################################
+#                                                       #
+#          Categorical Variable as Covariate            #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.height \
+    --binary-target F \
+    --cov Target_Data/TAR.covariate \
+    --cov-col Sex \
+    --cov-factor Sex \
+    --out Results/Height.sex
+
+
+#########################################################
+#                                                       #
+#         1.8       Case-Control Analysis               #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/Cardio_CAD.txt \
+    --target Target_Data/TAR \
+    --snp markername \
+    --A1 effect_allele \
+    --A2 noneffect_allele \
+    --chr chr \
+    --bp bp_hg19 \
+    --stat beta \
+    --beta \
+    --pvalue p_dgc \
+    --binary-target T \
+    --pheno Target_Data/TAR.cad \
+    --perm 100 \
+    --out Results/CAD.highres
+
+
+
+#########################################################
+#                                                       #
+#        1.9  Generate the Quantile Plot                #
+#                                                       #
+#########################################################
+
+# For the next few analyses we will over-write the previous results file
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/Cardio_CAD.txt \
+    --target Target_Data/TAR \
+    --snp markername \
+    --A1 effect_allele \
+    --A2 noneffect_allele \
+    --chr chr \
+    --bp bp_hg19 \
+    --stat beta \
+    --beta \
+    --pvalue p_dgc \
+    --binary-target T \
+    --pheno Target_Data/TAR.cad \
+    --perm 100 \
+    --quantile 10 \
+    --plot \
+    --out Results/CAD.highres
+
+#########################################################
+#                                                       #
+#              Generate the Strata Plot                 #
+#                                                       #
+#########################################################
+
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/Cardio_CAD.txt \
+    --target Target_Data/TAR \
+    --snp markername \
+    --A1 effect_allele \
+    --A2 noneffect_allele \
+    --chr chr \
+    --bp bp_hg19 \
+    --stat beta \
+    --beta \
+    --pvalue p_dgc \
+    --binary-target T \
+    --pheno Target_Data/TAR.cad \
+    --perm 100 \
+    --quantile 100 \
+    --quant-break 1,5,10,20,40,60,80,90,95,99,100 \
+    --quant-ref 60 \
+    --plot \
+    --out Results/CAD.highres
+
+
+#########################################################
+#                                                       #
+#         1.10        Cross Trait Analysis              #
+#                                                       #
+#########################################################
+
+Rscript ./Software/PRSice.R \
+    --prsice Software/PRSice_mac \
+    --base Base_Data/GIANT_Height.txt \
+    --target Target_Data/TAR \
+    --snp MarkerName \
+    --A1 Allele1 \
+    --A2 Allele2 \
+    --stat b \
+    --beta \
+    --pvalue p \
+    --pheno Target_Data/TAR.cad \
+    --binary-target T \
+    --out Results/Cross.highres
