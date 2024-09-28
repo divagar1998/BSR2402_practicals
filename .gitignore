@@ -1,0 +1,3 @@
+./statistical_genetics_practical/*
+!./statistical_genetics_practical/part1/*sh
+!./statistical_genetics_practical/part2/*txt
